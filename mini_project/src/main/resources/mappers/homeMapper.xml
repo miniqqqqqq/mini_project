@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="homeMapper">
+
+    <insert id="insertUser" parameterType="kr.mini_project.Dto.joinDto">
+        INSERT INTO USERS(
+            USER_ID,
+            USER_NM,
+            MAIL,
+            PASSWORD,
+            JOIN_DTTM,
+            USER_STAT
+        )VALUES(
+            #{userId},
+            #{userNm},
+            #{mail},
+            #{password},
+            CURRENT_TIMESTAMP,
+            'NOR'
+        )
+    </insert>
+    <select id="getLoginChk" resultType="int" parameterType="kr.mini_project.Dto.joinDto">
+    SELECT COUNT(USER_ID)
+    FROM USERS
+    WHERE USER_ID = #{userId}
+        <if test="password != null">
+            AND PASSWORD = #{password}
+            AND USER_STAT != 'END'
+        </if>
+    </select>
+
+    <select id="getMuflixList" resultType="kr.mini_project.Dto.MuflixDto" parameterType="java.util.Map">
+        SELECT
+            VIDEO_NO,
+            VIDEO_CD,
+            VIDEO_IMG,
+            VIDEO_NM,
+            VIDEO_DIS,
+            VIDEO_URL,
+            COUNT(*) OVER() AS TOTAL_CNT
+        FROM VIDEO_LIST
+        WHERE 1=1
+        <if test='searchVal != null and searchVal != ""'>
+            AND VIDEO_NM LIKE CONCAT('%',#{searchVal}, '%')
+        </if>
+        <if test='searchCd != null and searchCd != ""'>
+            AND VIDEO_CD = #{searchCd}
+        </if>
+        ORDER BY VIDEO_DTTM DESC
+        <if test="pageSize != null">
+        LIMIT #{pageSize} OFFSET #{startRow}
+        </if>
+    </select>
+
+    <select id="getOneVideo" resultType="kr.mini_project.Dto.MuflixDto" parameterType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            VIDEO_NO,
+            VIDEO_CD,
+            CASE
+                WHEN VIDEO_CD = 'MU' THEN '뮤지컬'
+                ELSE '영화'
+                END AS VIDEO_CD_NM,
+            VIDEO_IMG,
+            VIDEO_NM,
+            VIDEO_URL,
+            VIDEO_DIS,
+            VIDEO_DTTM,
+            (SELECT COUNT(USER_ID) FROM LIKES B WHERE A.VIDEO_NO = B.VIDEO_NO) AS LIKE_CNT, /* 영상 좋아요 수 */
+            CASE
+                WHEN EXISTS (
+                            SELECT 1
+                            FROM LIKES B
+                            WHERE A.VIDEO_NO = B.VIDEO_NO AND B.USER_ID = #{userId}
+                            ) THEN 1
+                ELSE 0 /* 내가 좋아요 누르면 1 아니면 0 */
+                END AS USER_LIKE
+        FROM VIDEO_LIST A
+        WHERE VIDEO_NO = #{videoNo}
+    </select>
+
+    <select id="getTickBuyUser" resultType="kr.mini_project.Dto.joinDto" parameterType="String">
+        SELECT
+            A.USER_ID,
+            A.USER_NM,
+            A.TICKET_NO,
+            B.END_DTTM,
+            (SELECT TICKET_NM FROM TICKET_LIST WHERE TICKET_NO = A.TICKET_NO) AS TICKET_NAME
+        FROM USERS A
+        LEFT JOIN BUY_USER B ON A.USER_ID = B.USER_ID
+        WHERE A.USER_ID = #{userId}
+        AND A.TICKET_NO IS NOT NULL
+        AND (A.USER_STAT = 'NOR' OR A.user_stat ='ADM') -- 운영자도 포함시킴
+        AND  B.END_DTTM >= TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+</mapper>

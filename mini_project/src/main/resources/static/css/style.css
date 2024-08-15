@@ -1,0 +1,675 @@
+@import "reset.css";
+
+/* 헤더 스타일 */
+.header {
+  height: 100px;
+  background-color: #333; /* 배경색을 어두운 색상으로 설정 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+}
+
+.header h1 {position: absolute;left: 20px;}
+.header h1 a {display: block;}
+.header h1 a img {display: block;height: 100px;}
+
+.header.compact {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    margin-left: 200px;
+}
+
+/* 검색 */
+.btn-search {display: inline-block;padding: 50px;color: transparent;font-size: 0;background: url(../img/icon-search.png) center / 50px no-repeat;}
+.playlist-search {z-index: 99;position: absolute;left: 0;top: 0;display: block;width: 100%;padding: 100px 0;text-align: center;background: #fff;}
+.playlist-search .btn-close {position: absolute;top: 40px;right: 40px;padding: 30px;color: transparent;font-size: 0;text-indent: -9999px;background: url(../img/btn-close.png) center / 4rem no-repeat;}
+.playlist-search p {font-size: 30px;font-weight: 800;}
+.playlist-search input[type="text"] {
+  background-color: #fff;
+  border: 1px solid #000;
+  width: 800px;
+  padding: 20px 16px;
+  border-radius: 16px;
+  font-size: 18px;
+}
+.playlist-search input[type="text"]:focus {border-color: #af1212;}
+.search-inner {position: relative;max-width: 800px;margin: 30px auto 0;}
+.search-inner button {position: absolute;top: 50%;right: 0;padding: 30px;color: transparent;font-size: 0;text-indent: -9999px;transform: translateY(-50%);background: url(../img/icon-search.png) center / 40px no-repeat;}
+.welcome-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.welcome-message {
+    display: inline-block;
+    color: white;
+    font-size: 22px;
+    font-weight: 500;
+    margin-right: 10px;
+}
+
+.login-link {
+    color: white;
+    font-size: 18px;
+    background-color: #af1212;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.login-link + .login-link {margin-left: 5px;}
+
+.login-link:hover {
+    font-weight: 700;
+    color: #af1212;
+    background-color: #fff;
+    transition: 0.3s;
+}
+
+/*마이페이지 탭 스타일*/
+.tab {
+    overflow: hidden;
+    background-color: #f1f1f1;
+}
+
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: background-color 0.3s ease;
+}
+
+.tab button:hover {
+    background-color: #ddd;
+}
+
+.tab button.active {
+    background-color: #ccc;
+}
+
+.tabcontent {
+    display: none;
+    padding: 20px;
+    border-top: 1px solid #ccc;
+}
+
+/* 탭 목록 활성화 시 해당 탭 내용 표시 */
+.show {
+    display: block;
+}
+
+.movie-grid {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.video-frame iframe {
+    width: 800px; /* 영상의 너비를 조정합니다. */
+    height: 450px; /* 영상의 높이를 조정합니다. */
+    margin-bottom: 20px; /* 영상과 이름 사이의 간격을 설정합니다. */
+}
+/* 전체 플레이리스트 컨테이너 스타일링 */
+#playList,
+ #myComm,
+ #likes,
+ #buyTick{
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 플레이리스트 헤더 스타일링 */
+.playlist-header {
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.my-play-list .playlist-header{
+    display: flex;
+
+}
+
+.my-buy-ticket .playlist-header{
+    display: flex;
+}
+
+.my-comment-list .playlist-header{
+    display: flex;
+}
+
+.playlist-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.playlist-actions {
+    display: flex;
+    gap: 10px; /* 수정과 삭제 버튼 사이의 간격 */
+}
+
+.playNm {
+    flex: 1;
+    text-align: center;
+}
+
+/* 사용자 ID 스타일링 */
+.userId {
+    flex: 1;
+    text-align: center; /* 가운데 정렬 */
+}
+
+/* 비밀 여부 스타일링 */
+.secretYn {
+    flex: 1;
+    text-align: center; /* 가운데 정렬 */
+}
+
+/* 작성일자 스타일링 */
+.playDttm {
+    flex: 1;
+    text-align: right; /* 오른쪽 정렬 */
+    color: #888;
+}
+
+/* 좋아요 화면 스타일링 */
+#likes .playlist-item {
+display: flex;
+align-items: flex-start;
+}
+
+#likes .playlist-item img {
+margin-right: 10px;
+}
+
+#likes .playlist-item .content {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+}
+
+#likes .playlist-item .content h3 {
+margin: 0 0 10px 0;
+}
+
+#likes .playlist-item .content .video-type {
+margin-bottom: 10px;
+}
+
+/* 나의 후기 스타일링 */
+#myComm .playlist-item span {
+    margin: 5px 0;
+}
+
+.del-btn {
+    cursor: pointer;
+    color: #007bff;
+}
+
+.del-btn:hover {
+    text-decoration: underline;
+}
+
+.playNm{
+    font-size: 20px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.playNm:hover {
+    text-decoration: underline;
+}
+
+.playlist-item span {
+    flex: 1;
+    text-align: center;
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.modal {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5); /* 반투명 배경 */
+}
+
+
+/* 닫기 버튼 */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 모달 대화 상자 */
+.modal-dialog {
+    position: relative;
+    margin: 10% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+/* 모달 콘텐츠 */
+.modal-content {
+    position: relative;
+    padding: 20px;
+    background-color: #fefefe;
+    border-radius: 10px;
+}
+
+
+/* 제목 */
+#myModalLabel {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* 텍스트 영역 */
+#reportText {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    resize: none;
+}
+
+.selected {
+    border: 2px solid #FF5733; /* 선택된 항목의 테두리 스타일 */
+    background-color: #F9F9F9; /* 선택된 항목의 배경색 */
+    opacity: 0.8; /* 선택된 항목의 투명도 조정 */
+}
+
+.selected img {
+    border-radius: 8px; /* 선택된 항목의 이미지에 둥근 테두리 적용 */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* 선택된 항목의 이미지에 그림자 효과 추가 */
+}
+
+
+.comment-section {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.comment-section h2 {
+    margin-top: 0;
+}
+
+.comment-list {
+    margin-bottom: 20px;
+}
+
+.comment {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.comment:last-child {
+    border-bottom: none;
+}
+
+.comment .comment-text {
+    margin: 0;
+    color: #333;
+}
+
+.comment .comment-date {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: none;
+    font-family: inherit;
+}
+
+.rating {
+    direction: rtl; /* 오른쪽에서 왼쪽으로 배치 */
+}
+
+.star {
+    font-size: 2em;
+    cursor: pointer;
+    color: gray;
+}
+
+.star:hover,
+.star:hover ~ .star {
+    color: gold;
+}
+
+.star.star-selected {
+    color: gold;
+}
+
+    .comment-item {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .comment-rating {
+        flex: 1;
+        text-align: left;
+    }
+
+    .comment-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .comment-report {
+       cursor: pointer;
+       color: #007bff;
+       margin-left: 10px; /* 간격 조정 */
+   }
+    .comment-delete {
+        cursor: pointer;
+        color: #e10b0b;
+        margin-left: 10px; /* 간격 조정 */
+    }
+
+    .comment-report:hover,
+    .comment-delete:hover {
+        text-decoration: underline;
+    }
+
+.comment-userId {
+    font-weight: bold;
+    margin-bottom: 5px; /* 윗 여백을 주기 위한 예시입니다. */
+}
+
+    .comment-date {
+        flex: 1;
+        text-align: right;
+        color: #888;
+    }
+
+    .comment-body {
+        margin-top: 10px;
+    }
+
+    .comment-text {
+        white-space: pre-wrap;
+    }
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ticketList-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+}
+
+.ticketList-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    margin-top: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+
+.ticketList-item.selected {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.ticketList-item label {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+#payList {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pay {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.pay:hover {
+    background-color: #0056b3;
+}
+
+#ticketList .ticketList-item:hover {
+    background-color: #eaeaea;
+}
+
+
+
+/*  */
+.body-class {width: 100%;margin: 0 auto;padding: 80px 30px 50px;}
+.ti {text-align: center;font-size: 30px;font-weight: 800;}
+.sw-img {position: relative;width: 100%;padding-bottom: 143%;}
+.sw-img img {position: absolute;width: 100%;object-fit: cover; cursor:pointer}
+
+.movie-item p,.popular-title {
+    color: #000;
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+.modal-videoList p {
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.modal-ti {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.mg-top{
+    margin-top: 50px
+}
+
+.button-class {
+    padding: 10px 20px;
+    background-color: #6b6b6b;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.video-title {
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.text-box{
+    background-color: #fff;
+     border: 1px solid #000;
+     padding: 10px 20px;
+     border-radius: 16px;
+     font-size: 18px;
+}
+
+.page-link {
+    position: relative;
+    display: block;
+    padding: .5rem .75rem;
+    margin-left: -1px;
+    line-height: 1.25;
+    color: #007bff;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+}
+
+.pagination {
+    display: -ms-flexbox;
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 16px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.likes-movieNm {
+    font-size: 30px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.likes-movieNm:hover {
+    text-decoration: underline;
+}
+
+
+.ml-20{
+    margin-left: 20px;
+}
+
+.movie-item {
+    margin-right: 30px;
+    width: calc(20% - 30px);
+    margin-top: 30px;
+}
+
+.movie-grid {flex-wrap: wrap;margin-right: -30px;}  
+
+.movie-title{    
+    position: relative;
+    width: 100%;
+    padding-bottom: 120%;
+}
+.movie-title + p {margin-top: 10px;}
+.movie-grid img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.movie-item a {display: block;}
+.movie-item a:hover .popular-video,.movie-item a:hover .popular-title {text-decoration: underline;}
+.popular-video {display: block;position: relative;width: 100%;padding-bottom: 60%;}
+.popular-title { display: -webkit-box; -webkit-line-clamp: 2;  -webkit-box-orient: vertical; overflow: hidden;  text-overflow: ellipsis;margin-top: 10px;}
+input[type="checkbox"] {display: inline-block;padding: 10px;margin-right: 6px;background: url(../img/btn-check-off.png) center / 20px no-repeat;}
+input[type="checkbox"]:checked {background: url(../img/btn-check-on.png) center / 20px no-repeat;}
+label {display: inline-block;font-size: 16px;font-weight: 500;}
+
+.playlist-edit {
+    display: flex;
+    gap: 10px;
+    width: 70px;
+}
+
+.my-playlist-header-edit {
+    width: 70px;
+}
+
+.my-playlist-header {
+    flex:1;
+    text-align: center;
+}
+
+.play-list-dtl-title {
+    text-align: center;
+    font-size: 22px;
+    border-bottom: 1px solid #fff;
+    padding: 10px 0;
+}
+
+.playlist-dtl-userInfo {
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+
+.play-list-dtl-img {
+    width: 120px;
+    display: block;
+    margin: 0 auto;
+}
+
+.play-list-dtl-nm {
+    margin: 30px auto 0;
+    max-width: 800px;
+}
+
+.playList .playlist-item {
+    display: flex;
+    justify-content: space-between;
+}
+
+select {padding: 10px 34px 10px 10px;border: 1px solid #333;background: url(../img/icon-input-drop.png) right 2px center / 20px no-repeat;}

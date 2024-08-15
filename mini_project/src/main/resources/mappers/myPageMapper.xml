@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="myPageMapper">
+
+    <select id="getTicketList" parameterType="String" resultType="kr.mini_project.Dto.TicketDto">
+        SELECT
+            A.TICKET_NO,
+            A.TICKET_NM,
+            A.TICKET_PRI,
+            A.TICKET_TIME,
+            CASE
+                WHEN B.TICKET_NO IS NOT NULL THEN '0'
+                ELSE NULL
+            END AS MY_TICK
+        FROM TICKET_LIST A
+        LEFT JOIN (SELECT DISTINCT TICKET_NO FROM USERS WHERE USER_ID = #{userId}) B
+        ON A.TICKET_NO = B.TICKET_NO
+    </select>
+
+    <select id="getTicketBuyDtl" parameterType="String" resultType="kr.mini_project.Dto.TicketDto">
+        SELECT *
+        FROM TICKET_LIST
+        WHERE TICKET_NO = #{ticketNo}
+    </select>
+
+    <select id="getMyTicket" parameterType="kr.mini_project.Dto.TicketDto" resultType="String">
+        SELECT END_DTTM
+        FROM BUY_USER
+        WHERE USER_ID = #{userId}
+        AND END_DTTM >= TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+    <insert id="insertBuyUser" parameterType="kr.mini_project.Dto.TicketDto">
+        INSERT INTO BUY_USER (
+            <if test="tid != null">
+                KAKAO_TID,
+            </if>
+            USER_ID,
+            END_DTTM,
+            STR_DTTM,
+            TICKET_NO,
+            PAY_CD,
+            BUY_DTTM
+        )VALUES(
+            <if test="tid != null">
+                #{tid},
+            </if>
+            #{userId},
+            CONCAT(#{endDttm},'235959'),
+            CONCAT(#{strDttm},'000000'),
+            #{ticketNo},
+            #{payCd},
+            NOW()
+        )
+    </insert>
+
+    <update id="updateUserTickNo" parameterType="kr.mini_project.Dto.TicketDto">
+        UPDATE USERS
+        SET TICKET_NO = #{ticketNo}
+        WHERE USER_ID = #{userId}
+    </update>
+
+    <select id="getPlayList" parameterType="kr.mini_project.Dto.MypageDto" resultType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            PLAY_NO,
+            PLAY_NM,
+            USER_ID,
+            SECRET_YN,
+            PLAY_DTTM,
+            CASE WHEN
+                USER_ID = #{userId} THEN 1
+            ELSE 0
+            END PLAY_EDIT,
+            COUNT(*) OVER() AS TOTAL_COUNT
+        FROM
+            PLAY_LIST
+        WHERE 1=1
+        <choose>
+            <when test='myPlayChk eq "Y"'>
+                /* 나의 플레이리스트 보기 */
+                AND USER_ID = #{userId}
+            </when>
+            <otherwise>
+                /* 전체 플레이리스트 보기 */
+                AND SECRET_YN = 'N'
+                OR (USER_ID = #{userId} AND SECRET_YN = 'Y')
+            </otherwise>
+        </choose>
+        GROUP BY PLAY_NO
+        ORDER BY PLAY_DTTM DESC
+        LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <select id="getPlayListDtl" parameterType="kr.mini_project.Dto.MypageDto" resultType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            A.PLAY_NO,
+            A.PLAY_NM,
+            A.USER_ID,
+            A.PLAY_DTTM,
+            A.SECRET_YN,
+            B.VIDEO_NM,
+            B.VIDEO_NO,
+            B.VIDEO_IMG,
+            B.VIDEO_URL,
+            B.VIDEO_DIS,
+            B.VIDEO_CD,
+            (SELECT COUNT(C.USER_ID) FROM LIKES C WHERE B.VIDEO_NO = C.VIDEO_NO) AS LIKE_CNT,
+            CASE
+                WHEN EXISTS (
+                        SELECT 1
+                        FROM LIKES C
+                        WHERE B.VIDEO_NO = C.VIDEO_NO AND C.USER_ID = #{userId}
+                ) THEN 1
+            ELSE 0
+        END AS USER_LIKE
+        FROM
+            PLAY_LIST A
+        LEFT JOIN
+            VIDEO_LIST B ON A.VIDEO_NO = B.VIDEO_NO
+        WHERE
+            A.PLAY_NO = #{playNo}
+    </select>
+
+    <select id="getMyPlayListCnt" parameterType="kr.mini_project.Dto.MypageDto" resultType="Int">
+        SELECT COUNT(*)
+        FROM PLAY_LIST
+        WHERE PLAY_NO = #{playNo}
+        AND USER_ID = #{userId}
+        GROUP BY PLAY_NO
+    </select>
+
+    <select id="getMaxPlayNo" resultType="Int">
+        SELECT COALESCE(MAX(PLAY_NO), 0)
+        FROM PLAY_LIST
+    </select>
+
+    <insert id="insertPlayList" parameterType="kr.mini_project.Dto.MypageDto">
+        INSERT INTO PLAY_LIST (
+            PLAY_NO,
+            PLAY_NM,
+            USER_ID,
+            VIDEO_NO,
+            SECRET_YN,
+            PLAY_DTTM
+        )VALUES(
+            #{playNo},
+            #{playNm},
+            #{userId},
+            #{videoNo},
+            #{secretYn},
+            NOW()
+        )
+    </insert>
+
+    <delete id="deletePlayList" parameterType="kr.mini_project.Dto.MypageDto">
+        DELETE FROM PLAY_LIST
+        WHERE PLAY_NO= #{playNo}
+        AND USER_ID = #{userId}
+    </delete>
+
+    <insert id="insertLike" parameterType="kr.mini_project.Dto.MypageDto">
+        INSERT INTO LIKES(
+            LIKE_CD,
+            USER_ID,
+            VIDEO_NO,
+            LIKE_DTTM
+        )VALUES(
+            #{likeCd},
+            #{userId},
+            #{videoNo},
+            NOW()
+        )
+    </insert>
+
+    <delete id="deleteLike" parameterType="kr.mini_project.Dto.MypageDto">
+        DELETE FROM LIKES
+        WHERE VIDEO_NO = #{videoNo}
+        AND USER_ID = #{userId}
+    </delete>
+    
+    <select id="getLikesList" parameterType="kr.mini_project.Dto.MypageDto" resultType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            A.VIDEO_NO,
+            B.VIDEO_NM,
+            B.VIDEO_IMG,
+            B.VIDEO_URL,
+            B.VIDEO_CD,
+            A.USER_ID,
+            (SELECT COUNT(*) FROM LIKES WHERE VIDEO_NO = A.VIDEO_NO) AS LIKE_CNT,
+            COUNT(*) OVER() AS TOTAL_COUNT
+        FROM
+            LIKES A
+        LEFT JOIN
+            VIDEO_LIST B ON A.VIDEO_NO = B.VIDEO_NO
+        WHERE
+            A.USER_ID = #{userId}
+        <if test ='videoCd != null and videoCd != ""'>
+        AND
+            B.VIDEO_CD = #{videoCd}
+        </if>
+        ORDER BY A.LIKE_DTTM DESC
+        LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <insert id="insertComment" parameterType="kr.mini_project.Dto.MypageDto">
+        INSERT INTO COMMENT_LIST (
+            COMM_TEXT,
+            COMM_STAR,
+            USER_ID,
+            VIDEO_NO,
+            DEL_YN,
+            COMM_DTTM
+        )VALUES(
+            #{commText},
+            #{commStar},
+            #{userId},
+            #{videoNo},
+            'Y',
+            NOW()
+        )
+    </insert>
+
+    <select id="selectComment" parameterType="kr.mini_project.Dto.MypageDto" resultType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            COMM_NO,
+            COMM_TEXT,
+            COMM_STAR,
+            USER_ID,
+            CASE WHEN USER_ID = #{userId} THEN 1
+                ELSE 0
+                END MY_COMM,
+            COMM_DTTM
+        FROM COMMENT_LIST
+        WHERE VIDEO_NO = #{videoNo}
+        AND DEL_YN = 'Y'
+        ORDER BY COMM_NO DESC
+    </select>
+
+    <select id="getMyCommList" parameterType="kr.mini_project.Dto.MypageDto" resultType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            A.COMM_NO,
+            A.COMM_TEXT,
+            A.COMM_STAR,
+            A.VIDEO_NO,
+            A.COMM_DTTM,
+            (SELECT VIDEO_NM FROM VIDEO_LIST B WHERE A.VIDEO_NO = B.VIDEO_NO) AS VIDEO_NM,
+            (SELECT VIDEO_CD FROM VIDEO_LIST B WHERE A.VIDEO_NO = B.VIDEO_NO) AS VIDEO_CD,
+            COUNT(*) OVER() AS TOTAL_COUNT
+        FROM
+            COMMENT_LIST A
+        WHERE
+            USER_ID = #{userId}
+        AND DEL_YN ='Y'
+        ORDER BY COMM_DTTM DESC, VIDEO_NO
+        LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <select id="selectMyRepoCnt" parameterType="kr.mini_project.Dto.MypageDto" resultType="Int">
+        SELECT COUNT(REPO_NO)
+        FROM COMMENT_REPORT
+        WHERE COMM_NO = #{commNo}
+        AND REPO_ID = #{userId}
+    </select>
+
+    <insert id="insertCommReport" parameterType="kr.mini_project.Dto.MypageDto">
+        INSERT INTO COMMENT_REPORT (
+            COMM_NO,
+            REPO_ID,
+            REPO_TEXT,
+            PROC_YN
+        )VALUES(
+            #{commNo},
+            #{userId},
+            #{repoText},
+            'N'
+        )
+    </insert>
+
+    <select id="myCommentChk" parameterType="kr.mini_project.Dto.MypageDto" resultType="Int">
+        SELECT COUNT(COMM_NO)
+        FROM COMMENT_LIST
+        WHERE COMM_NO = #{commNo}
+        AND USER_ID = #{userId}
+    </select>
+
+    <update id="updateCommentDel" parameterType="kr.mini_project.Dto.MypageDto">
+        UPDATE COMMENT_LIST
+        SET DEL_YN ='N'
+        WHERE COMM_NO = #{commNo}
+    </update>
+
+    <select id="getMyBuyTicketList" parameterType="kr.mini_project.Dto.MypageDto" resultType="kr.mini_project.Dto.MypageDto">
+            SELECT
+                A.TICKET_NO ,
+                SUBSTR(A.STR_DTTM,1,8) AS STR_DTTM,
+                SUBSTR(A.END_DTTM,1,8) AS END_DTTM,
+                A.BUY_DTTM,
+                B.TICKET_NM ,
+                B.TICKET_PRI ,
+                A.PAY_CD,
+                CASE WHEN
+                    A.END_DTTM <![CDATA[<]]> TO_CHAR(NOW(), 'YYYYMMDDHH24MISS') THEN 'END'
+                ELSE 'ING'
+                END AS TICKET_CD,
+                B.TICKET_TIME,
+                <!-- 관리자 페이지에서 조회시 필요함으로 넣어줌. -->
+                A.USER_ID,
+                A.REFUND_PRI,
+                CASE WHEN
+                    A.REFUND_PRI > 0 THEN 'Y'
+                END AS REFUND_YN,
+                SUM(B.TICKET_PRI) OVER() AS ALL_PRICE,
+                SUM(A.REFUND_PRI) OVER() AS REFUND_PRICE,
+                (SUM(B.TICKET_PRI) OVER() - SUM(A.REFUND_PRI) OVER()) AS TOTAL_PRICE,
+                <!-- 관리자 페이지에서 조회시 필요함으로 넣어줌 끝 -->
+                COUNT(*) OVER() AS TOTAL_COUNT
+            FROM BUY_USER A
+            LEFT JOIN TICKET_LIST B
+            ON A.TICKET_NO = B.TICKET_NO
+            WHERE 1=1
+            <if test ='userId != null'>
+                AND USER_ID = #{userId}
+            </if>
+            <if test ='strDttm != null and strDttm != "" and endDttm != null and endDttm != ""'>
+                AND SUBSTR(A.STR_DTTM, 1, 8) BETWEEN #{strDttm} AND #{endDttm}
+                AND SUBSTR(A.END_DTTM, 1, 8) BETWEEN #{strDttm} AND #{endDttm}
+            </if>
+            ORDER BY A.BUY_DTTM DESC
+            LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <select id="getMyticketDttm" parameterType="kr.mini_project.Dto.TicketDto" resultType="kr.mini_project.Dto.TicketDto">
+        SELECT
+            END_DTTM,
+            SUBSTR(STR_DTTM,1,8) AS STR_DTTM,
+            (SELECT TICKET_PRI FROM TICKET_LIST B WHERE TICKET_NO = A.TICKET_NO) AS TICKET_PRI,
+            KAKAO_TID AS TID
+        FROM BUY_USER A
+        WHERE USER_ID = #{userId}
+        AND TICKET_NO = #{ticketNo}
+        ORDER BY BUY_DTTM DESC
+        LIMIT 1
+    </select>
+
+    <update id="updateTicketEndDttm" parameterType="kr.mini_project.Dto.TicketDto">
+        UPDATE BUY_USER
+        SET END_DTTM = TO_CHAR(NOW(), 'YYYYMMDDHH24MISS'),
+            REFUND_PRI = #{refundPri}
+        WHERE USER_ID = #{userId}
+        AND END_DTTM = #{endDttm}
+    </update>
+</mapper>

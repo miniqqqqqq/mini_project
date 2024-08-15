@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="adminMapper">
+
+    <select id="getUserList" resultType="kr.mini_project.Dto.joinDto" parameterType="java.util.Map">
+        SELECT
+            USER_ID,
+            MAIL,
+            USER_NM,
+            JOIN_DTTM,
+            USER_STAT,
+            CASE
+                WHEN USER_STAT = 'NOR' THEN '정상회원'
+                WHEN USER_STAT = 'ADM' THEN '관리자'
+                WHEN USER_STAT = 'END' THEN '탈퇴회원'
+            END AS USER_STAT_NM,
+            COUNT(*) OVER() AS USER_CNT
+        FROM USERS
+        WHERE 1=1
+        <if test="searchCd == 'status'">
+            AND USER_STAT = #{userStat}
+        </if>
+        <if test="searchCd == 'name'">
+            AND USER_NM = #{searchVal}
+        </if>
+        <if test="searchCd == 'id'">
+            AND USER_ID = #{searchVal}
+        </if>
+        <if test='ticketYn eq "Y"'>
+            AND TICKET_NO IS NOT NULL
+            AND USER_STAT != 'END'
+        </if>
+        ORDER BY JOIN_DTTM DESC
+        LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <select id="getAllTicketList" resultType="kr.mini_project.Dto.TicketDto" parameterType="java.util.Map">
+        SELECT
+            TICKET_NM,
+            TICKET_PRI,
+            TICKET_TIME,
+            COUNT(*) OVER() AS TICKET_CNT
+        FROM TICKET_LIST
+        ORDER BY TICKET_NO DESC
+        LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <insert id="insertTicket" parameterType="kr.mini_project.Dto.TicketDto">
+        INSERT INTO TICKET_LIST(
+            TICKET_NM,
+            TICKET_PRI,
+            TICKET_TIME
+        )VALUES(
+            #{ticketNm},
+            #{ticketPri},
+            #{ticketTime}
+        )
+    </insert>
+
+    <update id="updateUserStats" parameterType="String">
+        UPDATE USERS
+        SET USER_STAT = 'END'
+        WHERE USER_ID = #{userId}
+    </update>
+
+    <select id="getAllCommentList" parameterType="java.util.Map" resultType="kr.mini_project.Dto.MypageDto">
+        SELECT
+            A.USER_ID,
+            A.COMM_NO,
+            A.COMM_TEXT,
+            A.COMM_STAR,
+            A.VIDEO_NO,
+            A.COMM_DTTM,
+            (SELECT VIDEO_NM FROM VIDEO_LIST B WHERE A.VIDEO_NO = B.VIDEO_NO) AS VIDEO_NM,
+            COUNT(*) OVER() AS TOTAL_COUNT,
+            DEL_YN,
+            (SELECT COUNT(B.REPO_NO) FROM COMMENT_REPORT B WHERE A.COMM_NO = B.COMM_NO) AS REPO_CNT
+        FROM COMMENT_LIST A
+        WHERE 1=1
+        <if test="searchCd == 'name'">
+            AND (SELECT VIDEO_NM FROM VIDEO_LIST B WHERE A.VIDEO_NO = B.VIDEO_NO) LIKE CONCAT('%', #{searchVal}, '%')
+        </if>
+        <if test="searchCd == 'id'">
+            AND A.USER_ID = #{searchVal}
+        </if>
+        <if test='delYn == "Y"'>
+            AND DEL_YN = 'Y'
+        </if>
+        <choose>
+            <when test="sortOrder == 'starDesc'">
+                ORDER BY COMM_STAR DESC, COMM_NO DESC
+            </when>
+            <when test="sortOrder == 'repoDesc'">
+                ORDER BY (SELECT COUNT(B.REPO_NO) FROM COMMENT_REPORT B WHERE A.COMM_NO = B.COMM_NO) DESC, COMM_NO DESC
+            </when>
+            <otherwise>
+                ORDER BY COMM_NO DESC, COMM_DTTM DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{startRow}
+    </select>
+
+    <select id="selectReportList" resultType="kr.mini_project.Dto.MypageDto" parameterType="java.util.Map">
+        SELECT
+            REPO_NO,
+            REPO_ID,
+            REPO_TEXT,
+            COUNT(*) OVER() AS TOTAL_COUNT
+        FROM COMMENT_REPORT
+        WHERE COMM_NO = #{commNo}
+    </select>
+
+    <delete id="deleteVideo" parameterType="String">
+        DELETE FROM VIDEO_LIST
+        WHERE VIDEO_NO = #{videoNo}
+    </delete>
+
+    <insert id="insertVideo" parameterType="kr.mini_project.Dto.MuflixDto">
+        INSERT INTO VIDEO_LIST (
+            VIDEO_CD,
+            VIDEO_NM,
+            VIDEO_URL,
+            VIDEO_DIS,
+            VIDEO_DTTM,
+            VIDEO_IMG
+        )VALUES(
+            #{videoCd},
+            #{videoNm},
+            #{videoUrl},
+            #{videoDis},
+            NOW(),
+            #{videoImg}
+        )
+    </insert>
+
+    <select id="getVideoDtl" parameterType="String" resultType="kr.mini_project.Dto.MuflixDto">
+        SELECT
+            VIDEO_NO,
+            VIDEO_CD,
+            VIDEO_NM,
+            VIDEO_URL,
+            VIDEO_DIS,
+            VIDEO_IMG
+        FROM VIDEO_LIST
+        WHERE VIDEO_NO = #{videoNo}
+    </select>
+
+    <update id="updateVideo" parameterType="kr.mini_project.Dto.MuflixDto">
+        UPDATE
+            VIDEO_LIST
+        SET
+            VIDEO_CD = #{videoCd},
+            VIDEO_NM = #{videoNm},
+            VIDEO_URL = #{videoUrl},
+            VIDEO_DIS = #{videoDis},
+            VIDEO_IMG = #{videoImg}
+        WHERE VIDEO_NO = #{videoNo}
+    </update>
+</mapper>
